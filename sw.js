@@ -1,31 +1,30 @@
-const CACHE_NAME = "library-app-v2";
+const CACHE_NAME = "library-catalog-v3";
 
 const urlsToCache = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./catalog_FDSP_jijel.csv",
   "./logo.png",
-  "./faculty.jpg"
+  "./faculty.jpg",
+  "./icon.png",
+  "./icons.png",
+  "./catalog_FDSP_jijel.csv"
 ];
 
-// INSTALL
-self.addEventListener("install", (event) => {
-  self.skipWaiting(); // مهم جدًا
+self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
+    caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(urlsToCache);
     })
   );
+  self.skipWaiting();
 });
 
-// ACTIVATE
-self.addEventListener("activate", (event) => {
+self.addEventListener("activate", event => {
   event.waitUntil(
-    clients.claim(); // مهم جدًا
-    caches.keys().then((keys) => {
+    caches.keys().then(keys => {
       return Promise.all(
-        keys.map((key) => {
+        keys.map(key => {
           if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
@@ -33,13 +32,11 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
+  self.clients.claim();
 });
 
-// FETCH
-self.addEventListener("fetch", (event) => {
+self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
