@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
 
@@ -97,25 +97,12 @@ h1{
     text-align:center;
 }
 
-/* SEARCH */
+/* INPUTS */
 .search-box{
     display:flex;
     gap:10px;
-    align-items:center;
     flex-wrap:wrap;
     margin-bottom:10px;
-}
-
-.search-input{
-    position:relative;
-}
-
-.search-input span{
-    position:absolute;
-    right:10px;
-    top:50%;
-    transform:translateY(-50%);
-    color:#888;
 }
 
 input{
@@ -124,7 +111,6 @@ input{
     font-size:16px;
     border-radius:8px;
     border:1px solid #ccc;
-    margin:5px;
 }
 
 /* TABLE */
@@ -149,10 +135,6 @@ th{
     cursor:pointer;
 }
 
-tr:hover{
-    background:#f1f1f1;
-}
-
 /* BUTTON */
 button{
     padding:10px 15px;
@@ -168,11 +150,20 @@ button:hover{
     background:#0055aa;
 }
 
-/* PAGINATION */
-#pagination button{
-    padding:6px 10px;
-    margin:2px;
-    font-size:13px;
+/* INSTALL BUTTON */
+#installBtn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    padding:12px 18px;
+    background:#1a8f3a;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:14px;
+    cursor:pointer;
+    display:none;
+    z-index:999;
 }
 
 </style>
@@ -184,7 +175,6 @@ button:hover{
 <!-- HEADER -->
 <div class="header">
     <img src="logo.png">
-
     <div class="header-text">
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
         <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
@@ -195,7 +185,7 @@ button:hover{
 
 <div class="sidebar">
     <div class="card">
-        <img src="faculty.jpg" onerror="this.style.display='none'">
+        <img src="faculty.jpg">
         <p>كلية الحقوق والعلوم السياسية</p>
     </div>
 </div>
@@ -204,19 +194,11 @@ button:hover{
 
 <h1>فهرس مكتبة الكلية</h1>
 
-<!-- SEARCH -->
 <div class="search-box">
-
-<div class="search-input">
-    <span>🔍</span>
     <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث...">
-</div>
-
-<input type="text" id="authorFilter" placeholder="المؤلف">
-<input type="text" id="yearFilter" placeholder="السنة">
-
-<button onclick="advancedFilter()">🔍 تحديد البحث</button>
-
+    <input type="text" id="authorFilter" placeholder="المؤلف">
+    <input type="text" id="yearFilter" placeholder="السنة">
+    <button onclick="advancedFilter()">بحث متقدم</button>
 </div>
 
 <p id="count"></p>
@@ -233,7 +215,6 @@ button:hover{
 <th onclick="sortTable('class')">التصنيف</th>
 </tr>
 </thead>
-
 <tbody id="tbody"></tbody>
 </table>
 
@@ -251,6 +232,9 @@ button:hover{
 
 </div>
 </div>
+
+<!-- INSTALL BUTTON -->
+<button id="installBtn">📲 تثبيت التطبيق</button>
 
 <script>
 
@@ -298,9 +282,8 @@ if(currentPage>maxPage) currentPage=1;
 let start=(currentPage-1)*rowsPerPage;
 let pageRows=rows.slice(start,start+rowsPerPage);
 
-let html="";
-pageRows.forEach(r=>{
-html+=`
+document.getElementById("tbody").innerHTML =
+pageRows.map(r=>`
 <tr>
 <td>${r.title}</td>
 <td>${r.author}</td>
@@ -309,10 +292,7 @@ html+=`
 <td>${r.edition}</td>
 <td>${r.year}</td>
 <td>${r.class}</td>
-</tr>`;
-});
-
-document.getElementById("tbody").innerHTML=html;
+</tr>`).join("");
 
 document.getElementById("count").innerText="عدد الكتب: "+rows.length;
 
@@ -323,7 +303,6 @@ let pagesHTML="";
 for(let i=1;i<=maxPage;i++){
 pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
 }
-
 document.getElementById("pagination").innerHTML=pagesHTML;
 }
 
@@ -382,10 +361,24 @@ XLSX.utils.book_append_sheet(wb,ws,"catalog");
 XLSX.writeFile(wb,"catalog.xlsx");
 }
 
-/* PWA */
+/* SERVICE WORKER */
 if ("serviceWorker" in navigator) {
-navigator.serviceWorker.register("sw.js").catch(()=>{});
+navigator.serviceWorker.register("sw.js");
 }
+
+/* INSTALL APP */
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("installBtn").style.display = "block";
+});
+
+document.getElementById("installBtn").addEventListener("click", async () => {
+    deferredPrompt.prompt();
+    deferredPrompt = null;
+});
 
 </script>
 
