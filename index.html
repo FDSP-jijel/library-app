@@ -17,6 +17,7 @@ body{
     margin:40px;
     direction: rtl;
     background:linear-gradient(to right,#eef2f3,#dfe9f3);
+    padding-bottom:120px;
 }
 
 /* HEADER */
@@ -41,7 +42,7 @@ body{
     padding:3px;
 }
 
-/* SEARCH FIX */
+/* SEARCH */
 .search-input{
     position:relative;
     display:inline-block;
@@ -58,7 +59,7 @@ body{
     padding:12px 35px 12px 12px;
 }
 
-/* TABLE + BUTTON (بدون تغيير) */
+/* TABLE */
 table{
     border-collapse:collapse;
     width:100%;
@@ -80,6 +81,7 @@ th{
     cursor:pointer;
 }
 
+/* BUTTON */
 button{
     padding:10px 15px;
     margin:5px;
@@ -94,10 +96,24 @@ button:hover{
     background:#0055aa;
 }
 
+/* PAGINATION */
+#pagination{
+    margin-top:15px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    justify-content:center;
+}
+
+#pagination button{
+    padding:5px 10px;
+    font-size:12px;
+}
+
 /* INSTALL BUTTON */
 #installBtn{
     position:fixed;
-    bottom:20px;
+    bottom:90px;
     right:20px;
     padding:12px 18px;
     background:#1a8f3a;
@@ -228,8 +244,41 @@ pageRows.map(r=>`
 <td>${r.class}</td>
 </tr>`).join("");
 
-document.getElementById("count").innerText="عدد الكتب: "+rows.length;
-document.getElementById("pageInfo").innerText="صفحة "+currentPage;
+// COUNT
+document.getElementById("count").innerText =
+"عدد الكتب: " + rows.length;
+
+// PAGE INFO
+let max = Math.ceil(rows.length / rowsPerPage);
+document.getElementById("pageInfo").innerText =
+"صفحة " + currentPage + " / " + max;
+
+// PAGINATION
+let pagesHTML="";
+for(let i=1;i<=max;i++){
+pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
+}
+document.getElementById("pagination").innerHTML=pagesHTML;
+}
+
+/* PAGINATION FUNCTIONS */
+function goToPage(p){
+currentPage=p;
+display(currentData);
+}
+
+function nextPage(){
+if(currentPage < Math.ceil(currentData.length/rowsPerPage)){
+currentPage++;
+display(currentData);
+}
+}
+
+function prevPage(){
+if(currentPage > 1){
+currentPage--;
+display(currentData);
+}
 }
 
 /* SEARCH */
@@ -245,21 +294,20 @@ currentPage=1;
 display(filtered);
 }
 
-/* INSTALL EVENT FIX */
+/* INSTALL */
 window.addEventListener("beforeinstallprompt",(e)=>{
 e.preventDefault();
 deferredPrompt=e;
 document.getElementById("installBtn").style.display="block";
 });
 
-/* INSTALL BUTTON */
 document.getElementById("installBtn").addEventListener("click",()=>{
 if(!deferredPrompt) return;
 deferredPrompt.prompt();
 deferredPrompt=null;
 });
 
-/* SW */
+/* SERVICE WORKER */
 if ("serviceWorker" in navigator) {
 navigator.serviceWorker.register("sw.js");
 }
