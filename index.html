@@ -195,10 +195,17 @@ button:hover{
 <h1>فهرس مكتبة الكلية</h1>
 
 <div class="search-box">
-    <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث...">
+
+    <div class="search-input">
+        <span style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">🔍</span>
+        <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث..." 
+        style="padding-right:35px;">
+    </div>
+
     <input type="text" id="authorFilter" placeholder="المؤلف">
     <input type="text" id="yearFilter" placeholder="السنة">
     <button onclick="advancedFilter()">بحث متقدم</button>
+
 </div>
 
 <p id="count"></p>
