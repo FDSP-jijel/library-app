@@ -41,79 +41,24 @@ body{
     padding:3px;
 }
 
-.header-text h2{
-    font-size:16px;
-    color:#003366;
-    margin:0;
-    font-weight:700;
+/* SEARCH FIX */
+.search-input{
+    position:relative;
+    display:inline-block;
 }
 
-.faculty-title{
-    font-size:32px;
-    color:#1a8f3a;
-    font-weight:900;
-    margin:3px 0 0;
+.search-input span{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
 }
 
-/* LAYOUT */
-.container{
-    display:flex;
-    gap:20px;
-    align-items:flex-start;
+.search-input input{
+    padding:12px 35px 12px 12px;
 }
 
-.sidebar{
-    width:220px;
-}
-
-.card{
-    background:white;
-    border-radius:12px;
-    padding:10px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    text-align:center;
-    position:sticky;
-    top:20px;
-}
-
-.card img{
-    width:100%;
-    border-radius:10px;
-    margin-bottom:10px;
-}
-
-.card p{
-    font-size:14px;
-    color:#003366;
-    font-weight:600;
-}
-
-.main{
-    flex:1;
-}
-
-h1{
-    color:#003366;
-    text-align:center;
-}
-
-/* INPUTS */
-.search-box{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:10px;
-}
-
-input{
-    padding:12px;
-    width:250px;
-    font-size:16px;
-    border-radius:8px;
-    border:1px solid #ccc;
-}
-
-/* TABLE */
+/* TABLE + BUTTON (بدون تغيير) */
 table{
     border-collapse:collapse;
     width:100%;
@@ -135,7 +80,6 @@ th{
     cursor:pointer;
 }
 
-/* BUTTON */
 button{
     padding:10px 15px;
     margin:5px;
@@ -172,34 +116,21 @@ button:hover{
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <img src="logo.png">
-    <div class="header-text">
+    <div>
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
-        <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
+        <h3 style="color:#1a8f3a">كلية الحقوق والعلوم السياسية</h3>
     </div>
 </div>
 
-<div class="container">
-
-<div class="sidebar">
-    <div class="card">
-        <img src="faculty.jpg">
-        <p>كلية الحقوق والعلوم السياسية</p>
-    </div>
-</div>
-
-<div class="main">
-
-<h1>فهرس مكتبة الكلية</h1>
+<h1 style="text-align:center;">فهرس مكتبة الكلية</h1>
 
 <div class="search-box">
 
     <div class="search-input">
-        <span style="position:absolute; right:10px; top:50%; transform:translateY(-50%);">🔍</span>
-        <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث..." 
-        style="padding-right:35px;">
+        <span>🔍</span>
+        <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث...">
     </div>
 
     <input type="text" id="authorFilter" placeholder="المؤلف">
@@ -237,20 +168,17 @@ button:hover{
 
 <button onclick="downloadExcel()">تحميل Excel</button>
 
-</div>
-</div>
-
-<!-- INSTALL BUTTON -->
 <button id="installBtn">📲 تثبيت التطبيق</button>
 
 <script>
 
 let data=[], currentData=[], currentPage=1, rowsPerPage=100;
+let deferredPrompt = null;
 
+/* LOAD DATA */
 fetch("catalog_FDSP_jijel.csv")
 .then(res=>res.text())
 .then(text=>{
-
 text=text.replace(/^\uFEFF/,"");
 const rows=text.split(/\r?\n/);
 
@@ -276,11 +204,10 @@ class:cols[7]||""
 });
 
 display(data);
-
 });
 
+/* DISPLAY */
 function display(rows){
-
 currentData=rows;
 
 let maxPage=Math.ceil(rows.length/rowsPerPage);
@@ -302,19 +229,10 @@ pageRows.map(r=>`
 </tr>`).join("");
 
 document.getElementById("count").innerText="عدد الكتب: "+rows.length;
-
-document.getElementById("pageInfo").innerText=
-"صفحة " + currentPage + " / " + maxPage;
-
-let pagesHTML="";
-for(let i=1;i<=maxPage;i++){
-pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
-}
-document.getElementById("pagination").innerHTML=pagesHTML;
+document.getElementById("pageInfo").innerText="صفحة "+currentPage;
 }
 
-function goToPage(p){currentPage=p;display(currentData);}
-
+/* SEARCH */
 function searchTable(){
 let q=document.getElementById("search").value.toLowerCase();
 
@@ -327,65 +245,24 @@ currentPage=1;
 display(filtered);
 }
 
-function advancedFilter(){
-let a=document.getElementById("authorFilter").value.toLowerCase();
-let y=document.getElementById("yearFilter").value;
+/* INSTALL EVENT FIX */
+window.addEventListener("beforeinstallprompt",(e)=>{
+e.preventDefault();
+deferredPrompt=e;
+document.getElementById("installBtn").style.display="block";
+});
 
-let filtered=data.filter(r=>
-(!a || r.author.toLowerCase().includes(a)) &&
-(!y || r.year.includes(y))
-);
+/* INSTALL BUTTON */
+document.getElementById("installBtn").addEventListener("click",()=>{
+if(!deferredPrompt) return;
+deferredPrompt.prompt();
+deferredPrompt=null;
+});
 
-currentPage=1;
-display(filtered);
-}
-
-function nextPage(){
-if(currentPage < Math.ceil(currentData.length/rowsPerPage)){
-currentPage++;
-display(currentData);
-}
-}
-
-function prevPage(){
-if(currentPage > 1){
-currentPage--;
-display(currentData);
-}
-}
-
-function sortTable(key){
-let sorted=[...currentData].sort((a,b)=>
-(a[key]||"").localeCompare(b[key]||"")
-);
-display(sorted);
-}
-
-function downloadExcel(){
-let ws=XLSX.utils.json_to_sheet(currentData);
-let wb=XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb,ws,"catalog");
-XLSX.writeFile(wb,"catalog.xlsx");
-}
-
-/* SERVICE WORKER */
+/* SW */
 if ("serviceWorker" in navigator) {
 navigator.serviceWorker.register("sw.js");
 }
-
-/* INSTALL APP */
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById("installBtn").style.display = "block";
-});
-
-document.getElementById("installBtn").addEventListener("click", async () => {
-    deferredPrompt.prompt();
-    deferredPrompt = null;
-});
 
 </script>
 
