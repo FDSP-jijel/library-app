@@ -110,11 +110,11 @@ button:hover{
     font-size:12px;
 }
 
-/* INSTALL BUTTON */
+/* INSTALL BUTTON TOP LEFT */
 #installBtn{
     position:fixed;
-    bottom:90px;
-    right:20px;
+    top:20px;
+    left:20px;
     padding:12px 18px;
     background:#1a8f3a;
     color:white;
@@ -189,7 +189,7 @@ button:hover{
 <script>
 
 let data=[], currentData=[], currentPage=1, rowsPerPage=100;
-let deferredPrompt = null;
+let deferredPrompt=null;
 
 /* LOAD DATA */
 fetch("catalog_FDSP_jijel.csv")
@@ -224,6 +224,7 @@ display(data);
 
 /* DISPLAY */
 function display(rows){
+
 currentData=rows;
 
 let maxPage=Math.ceil(rows.length/rowsPerPage);
@@ -248,12 +249,13 @@ pageRows.map(r=>`
 document.getElementById("count").innerText =
 "عدد الكتب: " + rows.length;
 
-// PAGE INFO
-let max = Math.ceil(rows.length / rowsPerPage);
+// PAGINATION INFO
+let max=Math.ceil(rows.length/rowsPerPage);
+
 document.getElementById("pageInfo").innerText =
 "صفحة " + currentPage + " / " + max;
 
-// PAGINATION
+// BUTTONS
 let pagesHTML="";
 for(let i=1;i<=max;i++){
 pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
@@ -261,7 +263,7 @@ pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
 document.getElementById("pagination").innerHTML=pagesHTML;
 }
 
-/* PAGINATION FUNCTIONS */
+/* PAGINATION */
 function goToPage(p){
 currentPage=p;
 display(currentData);
@@ -294,6 +296,36 @@ currentPage=1;
 display(filtered);
 }
 
+/* ADVANCED FILTER */
+function advancedFilter(){
+let a=document.getElementById("authorFilter").value.toLowerCase();
+let y=document.getElementById("yearFilter").value;
+
+let filtered=data.filter(r=>
+(!a || r.author.toLowerCase().includes(a)) &&
+(!y || r.year.includes(y))
+);
+
+currentPage=1;
+display(filtered);
+}
+
+/* SORT */
+function sortTable(key){
+let sorted=[...currentData].sort((a,b)=>
+(a[key]||"").localeCompare(b[key]||"")
+);
+display(sorted);
+}
+
+/* EXCEL */
+function downloadExcel(){
+let ws=XLSX.utils.json_to_sheet(currentData);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"catalog");
+XLSX.writeFile(wb,"catalog.xlsx");
+}
+
 /* INSTALL */
 window.addEventListener("beforeinstallprompt",(e)=>{
 e.preventDefault();
@@ -301,14 +333,15 @@ deferredPrompt=e;
 document.getElementById("installBtn").style.display="block";
 });
 
-document.getElementById("installBtn").addEventListener("click",()=>{
+document.getElementById("installBtn").addEventListener("click",async()=>{
 if(!deferredPrompt) return;
 deferredPrompt.prompt();
+await deferredPrompt.userChoice;
 deferredPrompt=null;
 });
 
 /* SERVICE WORKER */
-if ("serviceWorker" in navigator) {
+if("serviceWorker" in navigator){
 navigator.serviceWorker.register("sw.js");
 }
 
