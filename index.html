@@ -1,0 +1,393 @@
+﻿<!DOCTYPE html>
+<html lang="ar">
+<head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003366">
+<meta charset="UTF-8">
+
+<title>Library Catalog</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+
+body{
+    font-family:Arial;
+    margin:40px;
+    direction: rtl;
+    background:linear-gradient(to right,#eef2f3,#dfe9f3);
+}
+
+/* HEADER */
+.header{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:15px 20px;
+    border-radius:12px;
+    margin-bottom:20px;
+    background:white;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+}
+
+.header img{
+    width:85px;
+    height:85px;
+    object-fit:contain;
+    border-radius:10px;
+    border:2px solid #ddd;
+    background:white;
+    padding:3px;
+}
+
+.header-text h2{
+    font-size:16px;
+    color:#003366;
+    margin:0;
+    font-weight:700;
+}
+
+.faculty-title{
+    font-size:32px;
+    color:#1a8f3a;
+    font-weight:900;
+    margin:3px 0 0;
+}
+
+/* LAYOUT */
+.container{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+}
+
+.sidebar{
+    width:220px;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    text-align:center;
+    position:sticky;
+    top:20px;
+}
+
+.card img{
+    width:100%;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:14px;
+    color:#003366;
+    font-weight:600;
+}
+
+.main{
+    flex:1;
+}
+
+h1{
+    color:#003366;
+    text-align:center;
+}
+
+/* SEARCH */
+.search-box{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+
+.search-input{
+    position:relative;
+}
+
+.search-input span{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#888;
+}
+
+input{
+    padding:12px;
+    width:250px;
+    font-size:16px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    margin:5px;
+}
+
+/* TABLE */
+table{
+    border-collapse:collapse;
+    width:100%;
+    margin-top:20px;
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+th,td{
+    border:1px solid #eee;
+    padding:10px;
+    text-align:right;
+}
+
+th{
+    background:#003366;
+    color:white;
+    cursor:pointer;
+}
+
+tr:hover{
+    background:#f1f1f1;
+}
+
+/* BUTTON */
+button{
+    padding:10px 15px;
+    margin:5px;
+    border:none;
+    background:#003366;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0055aa;
+}
+
+/* PAGINATION */
+#pagination button{
+    padding:6px 10px;
+    margin:2px;
+    font-size:13px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <img src="logo.png">
+
+    <div class="header-text">
+        <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
+        <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
+    </div>
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+    <div class="card">
+        <img src="faculty.jpg" onerror="this.style.display='none'">
+        <p>كلية الحقوق والعلوم السياسية</p>
+    </div>
+</div>
+
+<div class="main">
+
+<h1>فهرس مكتبة الكلية</h1>
+
+<!-- SEARCH -->
+<div class="search-box">
+
+<div class="search-input">
+    <span>🔍</span>
+    <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث...">
+</div>
+
+<input type="text" id="authorFilter" placeholder="المؤلف">
+<input type="text" id="yearFilter" placeholder="السنة">
+
+<button onclick="advancedFilter()">🔍 تحديد البحث</button>
+
+</div>
+
+<p id="count"></p>
+
+<table>
+<thead>
+<tr>
+<th onclick="sortTable('title')">العنوان</th>
+<th onclick="sortTable('author')">المؤلف</th>
+<th onclick="sortTable('publisher')">دار النشر</th>
+<th onclick="sortTable('place')">المكان</th>
+<th onclick="sortTable('edition')">الطبعة</th>
+<th onclick="sortTable('year')">السنة</th>
+<th onclick="sortTable('class')">التصنيف</th>
+</tr>
+</thead>
+
+<tbody id="tbody"></tbody>
+</table>
+
+<br>
+
+<button onclick="prevPage()">السابق</button>
+<span id="pageInfo"></span>
+<button onclick="nextPage()">التالي</button>
+
+<div id="pagination"></div>
+
+<br>
+
+<button onclick="downloadExcel()">تحميل Excel</button>
+
+</div>
+</div>
+
+<script>
+
+let data=[], currentData=[], currentPage=1, rowsPerPage=100;
+
+fetch("catalog_FDSP_jijel.csv")
+.then(res=>res.text())
+.then(text=>{
+
+text=text.replace(/^\uFEFF/,"");
+const rows=text.split(/\r?\n/);
+
+rows.slice(1).forEach(row=>{
+if(!row.trim()) return;
+
+let cols=row.split(";");
+if(cols.length<8) cols=row.split("\t");
+
+cols=cols.map(c=>c.replace(/^"|"$/g,"").trim());
+
+if(cols.length>=8){
+data.push({
+title:cols[1]||"",
+author:cols[2]||"",
+publisher:cols[3]||"",
+place:cols[5]||"",
+edition:cols[6]||"",
+year:cols[4]||"",
+class:cols[7]||""
+});
+}
+});
+
+display(data);
+
+});
+
+function display(rows){
+
+currentData=rows;
+
+let maxPage=Math.ceil(rows.length/rowsPerPage);
+if(currentPage>maxPage) currentPage=1;
+
+let start=(currentPage-1)*rowsPerPage;
+let pageRows=rows.slice(start,start+rowsPerPage);
+
+let html="";
+pageRows.forEach(r=>{
+html+=`
+<tr>
+<td>${r.title}</td>
+<td>${r.author}</td>
+<td>${r.publisher}</td>
+<td>${r.place}</td>
+<td>${r.edition}</td>
+<td>${r.year}</td>
+<td>${r.class}</td>
+</tr>`;
+});
+
+document.getElementById("tbody").innerHTML=html;
+
+document.getElementById("count").innerText="عدد الكتب: "+rows.length;
+
+document.getElementById("pageInfo").innerText=
+"صفحة " + currentPage + " / " + maxPage;
+
+let pagesHTML="";
+for(let i=1;i<=maxPage;i++){
+pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
+}
+
+document.getElementById("pagination").innerHTML=pagesHTML;
+}
+
+function goToPage(p){currentPage=p;display(currentData);}
+
+function searchTable(){
+let q=document.getElementById("search").value.toLowerCase();
+
+let filtered=data.filter(r=>
+Object.values(r).some(v=>
+v && v.toString().toLowerCase().includes(q)
+));
+
+currentPage=1;
+display(filtered);
+}
+
+function advancedFilter(){
+let a=document.getElementById("authorFilter").value.toLowerCase();
+let y=document.getElementById("yearFilter").value;
+
+let filtered=data.filter(r=>
+(!a || r.author.toLowerCase().includes(a)) &&
+(!y || r.year.includes(y))
+);
+
+currentPage=1;
+display(filtered);
+}
+
+function nextPage(){
+if(currentPage < Math.ceil(currentData.length/rowsPerPage)){
+currentPage++;
+display(currentData);
+}
+}
+
+function prevPage(){
+if(currentPage > 1){
+currentPage--;
+display(currentData);
+}
+}
+
+function sortTable(key){
+let sorted=[...currentData].sort((a,b)=>
+(a[key]||"").localeCompare(b[key]||"")
+);
+display(sorted);
+}
+
+function downloadExcel(){
+let ws=XLSX.utils.json_to_sheet(currentData);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"catalog");
+XLSX.writeFile(wb,"catalog.xlsx");
+}
+
+/* PWA */
+if ("serviceWorker" in navigator) {
+navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+
+</script>
+
+</body>
+</html>
