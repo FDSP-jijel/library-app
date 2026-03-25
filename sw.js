@@ -1,4 +1,4 @@
-const CACHE_NAME = "library-app-v1";
+const CACHE_NAME = "library-app-v2";
 
 const urlsToCache = [
   "./",
@@ -9,8 +9,9 @@ const urlsToCache = [
   "./faculty.jpg"
 ];
 
-// تثبيت Service Worker
+// INSTALL
 self.addEventListener("install", (event) => {
+  self.skipWaiting(); // مهم جدًا
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache);
@@ -18,9 +19,10 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// تفعيل Service Worker
+// ACTIVATE
 self.addEventListener("activate", (event) => {
   event.waitUntil(
+    clients.claim(); // مهم جدًا
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
@@ -33,7 +35,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// تشغيل بدون إنترنت
+// FETCH
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
