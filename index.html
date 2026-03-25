@@ -403,7 +403,9 @@ deferredPrompt=null;
 
 /* SW */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js", { scope: "./" });
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js", { scope: "./" });
+  });
 }
 
 </script>
