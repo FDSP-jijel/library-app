@@ -56,7 +56,8 @@ body{
 /* SIDEBAR IMAGE FIX */
 .container{
     display:flex;
-    gap:20px;
+    gap:25px;
+    align-items:flex-start;
 }
 
 .sidebar{
@@ -64,30 +65,25 @@ body{
 }
 
 .card{
-    background:white;
-    border-radius:12px;
-    padding:10px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    text-align:center;
+    width:100%;
+    padding:12px;
+    box-sizing:border-box;
 }
 
 .card img{
     width:100%;
-    height:260px;
-    object-fit:cover;
+    height:280px;
+    object-fit:contain;
     border-radius:14px;
     border:3px solid #003366;
     background:white;
-    padding:6px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.15);
+    padding:8px;
 }
   .sidebar{
-    width:280px;
+    width:320px;
+    flex-shrink:0;
 }
 
-.card{
-    padding:15px;
-}
     
 /* SEARCH */
 .search-input{
