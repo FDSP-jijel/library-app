@@ -258,8 +258,33 @@ button:hover{
 <script>
 
 let data=[], currentData=[], currentPage=1, rowsPerPage=100;
-let deferredPrompt=null;
+let deferredPrompt;
 
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const btn = document.getElementById("installBtn");
+  btn.style.display = "block";
+
+  btn.addEventListener("click", async () => {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+});
+
+setTimeout(() => {
+  if (!deferredPrompt) {
+    document.getElementById("installBtn").style.display = "block";
+    document.getElementById("installBtn").innerText = "📲 أضف إلى الشاشة الرئيسية";
+    
+    document.getElementById("installBtn").onclick = () => {
+      alert("اضغط على ⋮ ثم اختر Ajouter à l’écran d’accueil");
+    };
+  }
+}, 5000);
+    
 /* LOAD DATA */
 fetch("catalog_FDSP_jijel.csv")
 .then(r=>r.text())
