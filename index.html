@@ -8,7 +8,7 @@
 
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-    
+
 <title>Library Catalog</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -45,18 +45,13 @@ body{
     padding:3px;
 }
 
-/* LANGUAGE */
+/* LANG */
 .lang-switch{
     margin-top:10px;
     text-align:center;
 }
 
-.lang-switch button{
-    padding:5px 10px;
-    font-size:12px;
-}
-
-/* SIDEBAR IMAGE FIX */
+/* SIDEBAR */
 .container{
     display:flex;
     gap:25px;
@@ -64,7 +59,8 @@ body{
 }
 
 .sidebar{
-    width:220px;
+    width:340px;
+    flex-shrink:0;
 }
 
 .card{
@@ -75,19 +71,14 @@ body{
 
 .card img{
     width:100%;
-    height:280px;
+    height:320px;
     object-fit:contain;
     border-radius:14px;
     border:3px solid #003366;
     background:white;
-    padding:8px;
-}
-  .sidebar{
-    width:320px;
-    flex-shrink:0;
+    padding:10px;
 }
 
-    
 /* SEARCH */
 .search-input{
     position:relative;
@@ -151,12 +142,7 @@ button:hover{
     justify-content:center;
 }
 
-#pagination button{
-    padding:5px 10px;
-    font-size:12px;
-}
-
-/* INSTALL BUTTON TOP LEFT */
+/* INSTALL BUTTON */
 #installBtn{
     position:fixed;
     top:20px;
@@ -178,7 +164,6 @@ button:hover{
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <img src="logo.png">
     <div>
@@ -195,7 +180,6 @@ button:hover{
 
 <div class="container">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
     <div class="card">
         <img src="faculty.jpg">
@@ -252,14 +236,14 @@ button:hover{
 </div>
 </div>
 
-<!-- INSTALL -->
 <button id="installBtn">📲 تثبيت التطبيق</button>
 
 <script>
 
 let data=[], currentData=[], currentPage=1, rowsPerPage=100;
-let deferredPrompt;
+let deferredPrompt=null;
 
+/* INSTALL */
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
@@ -267,24 +251,20 @@ window.addEventListener('beforeinstallprompt', (e) => {
   const btn = document.getElementById("installBtn");
   btn.style.display = "block";
 
-  btn.addEventListener("click", async () => {
+  btn.onclick = async () => {
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
-  });
+  };
 });
 
-setTimeout(() => {
-  if (!deferredPrompt) {
-    document.getElementById("installBtn").style.display = "block";
-    document.getElementById("installBtn").innerText = "📲 أضف إلى الشاشة الرئيسية";
-    
-    document.getElementById("installBtn").onclick = () => {
-      alert("اضغط على ⋮ ثم اختر Ajouter à l’écran d’accueil");
-    };
-  }
-}, 5000);
-    
+/* fallback button */
+setTimeout(()=>{
+if(!deferredPrompt){
+document.getElementById("installBtn").style.display="block";
+}
+},4000);
+
 /* LOAD DATA */
 fetch("catalog_FDSP_jijel.csv")
 .then(r=>r.text())
@@ -318,11 +298,10 @@ display(data);
 
 /* DISPLAY */
 function display(rows){
-
 currentData=rows;
 
-let maxPage=Math.ceil(rows.length/rowsPerPage);
-if(currentPage>maxPage) currentPage=1;
+let max=Math.ceil(rows.length/rowsPerPage);
+if(currentPage>max) currentPage=1;
 
 let start=(currentPage-1)*rowsPerPage;
 let pageRows=rows.slice(start,start+rowsPerPage);
@@ -339,19 +318,17 @@ pageRows.map(r=>`
 <td>${r.class}</td>
 </tr>`).join("");
 
-document.getElementById("count").innerText="عدد الكتب: "+rows.length;
-
-let max=Math.ceil(rows.length/rowsPerPage);
+updateCountText(rows.length);
 document.getElementById("pageInfo").innerText="صفحة "+currentPage+" / "+max;
 
-let pagesHTML="";
+let pages="";
 for(let i=1;i<=max;i++){
-pagesHTML+=`<button onclick="goToPage(${i})">${i}</button>`;
+pages+=`<button onclick="goToPage(${i})">${i}</button>`;
 }
-document.getElementById("pagination").innerHTML=pagesHTML;
+document.getElementById("pagination").innerHTML=pages;
 }
 
-/* PAGINATION */
+/* FIX PAGINATION */
 function goToPage(p){currentPage=p;display(currentData);}
 function nextPage(){if(currentPage<Math.ceil(currentData.length/rowsPerPage)){currentPage++;display(currentData);}}
 function prevPage(){if(currentPage>1){currentPage--;display(currentData);}}
@@ -366,7 +343,7 @@ currentPage=1;
 display(filtered);
 }
 
-/* ADVANCED */
+/* FILTER */
 function advancedFilter(){
 let a=document.getElementById("authorFilter").value.toLowerCase();
 let y=document.getElementById("yearFilter").value;
@@ -375,7 +352,6 @@ let filtered=data.filter(r=>
 (!a || r.author.toLowerCase().includes(a)) &&
 (!y || r.year.includes(y))
 );
-
 currentPage=1;
 display(filtered);
 }
@@ -388,49 +364,66 @@ let sorted=[...currentData].sort((a,b)=>
 display(sorted);
 }
 
+/* COUNT */
+function updateCountText(num){
+let lang = localStorage.getItem("lang") || "ar";
+
+const labels = {
+ar:"عدد الكتب: ",
+fr:"Nombre de livres : ",
+en:"Books count: "
+};
+
+document.getElementById("count").innerText =
+labels[lang] + (num ?? currentData.length);
+}
+
 /* LANG */
 function setLang(lang){
-if(lang==='fr'){
-document.getElementById("mainTitle").innerText="Catalogue de la bibliothèque";
-document.getElementById("facultyText").innerText="Faculté de droit et sciences politiques";
-document.getElementById("title2").innerText="Faculté de droit et sciences politiques";
-}
-else if(lang==='en'){
-document.getElementById("mainTitle").innerText="Library Catalog";
-document.getElementById("facultyText").innerText="Faculty of Law and Political Science";
-document.getElementById("title2").innerText="Faculty of Law and Political Science";
-}
-else{
-location.reload();
-}
+
+localStorage.setItem("lang", lang);
+
+if(lang==="en" || lang==="fr"){
+document.body.style.direction="ltr";
+}else{
+document.body.style.direction="rtl";
 }
 
-/* EXCEL */
-function downloadExcel(){
-let ws=XLSX.utils.json_to_sheet(currentData);
-let wb=XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(wb,ws,"catalog");
-XLSX.writeFile(wb,"catalog.xlsx");
+const texts = {
+ar:{title:"فهرس مكتبة الكلية",faculty:"كلية الحقوق والعلوم السياسية",search:"ابحث...",author:"المؤلف",year:"السنة",advanced:"بحث متقدم",prev:"السابق",next:"التالي",download:"تحميل Excel"},
+fr:{title:"Catalogue de la bibliothèque",faculty:"Faculté de droit et sciences politiques",search:"Rechercher...",author:"Auteur",year:"Année",advanced:"Recherche avancée",prev:"Précédent",next:"Suivant",download:"Télécharger Excel"},
+en:{title:"Library Catalog",faculty:"Faculty of Law and Political Science",search:"Search...",author:"Author",year:"Year",advanced:"Advanced Search",prev:"Previous",next:"Next",download:"Download Excel"}
+};
+
+let t=texts[lang];
+
+document.getElementById("mainTitle").innerText=t.title;
+document.getElementById("facultyText").innerText=t.faculty;
+document.getElementById("title2").innerText=t.faculty;
+
+document.getElementById("search").placeholder=t.search;
+document.getElementById("authorFilter").placeholder=t.author;
+document.getElementById("yearFilter").placeholder=t.year;
+
+document.querySelector("button[onclick='advancedFilter()']").innerText=t.advanced;
+document.querySelector("button[onclick='prevPage()']").innerText=t.prev;
+document.querySelector("button[onclick='nextPage()']").innerText=t.next;
+document.querySelector("button[onclick='downloadExcel()']").innerText=t.download;
+
+updateCountText();
 }
 
-/* INSTALL */
-window.addEventListener("beforeinstallprompt",(e)=>{
-e.preventDefault();
-deferredPrompt=e;
-document.getElementById("installBtn").style.display="block";
-});
-
-document.getElementById("installBtn").addEventListener("click",async()=>{
-if(!deferredPrompt) return;
-deferredPrompt.prompt();
-deferredPrompt=null;
-});
+/* LOAD SAVED LANG */
+window.onload = () => {
+let savedLang = localStorage.getItem("lang");
+if(savedLang){
+setLang(savedLang);
+}
+};
 
 /* SW */
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js", { scope: "./" });
-  });
+navigator.serviceWorker.register("./sw.js");
 }
 
 </script>
