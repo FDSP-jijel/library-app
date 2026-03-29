@@ -1,6 +1,6 @@
 {
-  "name": "Library Catalog FDSP Jijel",
-  "short_name": "Library",
+  "name": "Library Catalog FLPS Jijel",
+"short_name": "FLPS Library"
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
