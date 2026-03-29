@@ -403,14 +403,14 @@ function getReply(msg){
 
     // إضافة حدث النقر بعد إضافة الرسالة
     setTimeout(()=>{
-      document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{
-        el.onclick = ()=>{
-          let book = results[parseInt(el.dataset.index)];
-          highlightRow(book);
-          showBookDetails(book);
-        };
-      });
-    },50);
+  document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{
+    el.onclick = ()=>{
+      let book = results[parseInt(el.dataset.index)];
+      highlightRow(book);     // تمييز الصف
+      showBookDetails(book); // عرض التفاصيل في الدردشة
+    };
+  });
+},50);
 
     return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته:<br>${list}`;
   }
