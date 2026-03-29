@@ -386,11 +386,24 @@ document.getElementById("chatBtn").onclick = ()=>{let box=document.getElementByI
 function handleChat(e){if(e.key!=="Enter") return; let input=document.getElementById("chatInput"); let msg=input.value.trim(); if(!msg) return; addMessage("👤 "+msg); let reply=getReply(msg.toLowerCase()); setTimeout(()=>addMessage("🤖 "+reply),500); input.value="";}
 function addMessage(text){let box=document.getElementById("chatMessages"); box.innerHTML+="<div>"+text+"</div>"; box.scrollTop=box.scrollHeight;}
 function getReply(msg){
-    if(msg.includes("بحث")||msg.includes("search")) return "🔍 يمكنك استخدام مربع البحث في الأعلى";
-    if(msg.includes("تحميل")) return "📥 اضغط على زر تحميل Excel";
-    if(msg.includes("تثبيت")||msg.includes("install")) return "📲 اضغط على زر التثبيت أعلى الصفحة";
-    if(msg.includes("bonjour")) return "Bonjour 👋 Comment puis-je vous aider ?";
-    return "🤖 أنا مساعد بسيط، حاول كتابة كلمة مثل: بحث، تحميل، تثبيت";
+  msg = msg.toLowerCase();
+
+  // البحث داخل الكتب
+  let results = data.filter(r =>
+    Object.values(r).some(v => v && v.toLowerCase().includes(msg))
+  );
+
+  if(results.length > 0){
+    return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته. استخدم مربع البحث لمزيد من التفاصيل.`;
+  }
+
+  // كلمات مفتاحية ثابتة
+  if(msg.includes("تحميل")) return "📥 اضغط على زر تحميل Excel";
+  if(msg.includes("تثبيت") || msg.includes("install")) return "📲 اضغط على زر التثبيت أعلى الصفحة";
+  if(msg.includes("bonjour")) return "Bonjour 👋 Comment puis-je vous aider ?";
+
+  // الرد الافتراضي
+  return "🤖 أنا مساعدك الذكي، جرب كتابة اسم كتاب، مؤلف، سنة أو كلمة مفتاحية.";
 }
 </script>
 
