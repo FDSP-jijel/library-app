@@ -394,10 +394,25 @@ function getReply(msg){
   );
 
   if(results.length > 0){
-    // إعداد قائمة مختصرة من الكتب للعرض في الدردشة (أول 5 فقط لتجنب طول الرسالة)
-    let list = results.slice(0,5).map(r => `📖 ${r.title} - ${r.author} (${r.year})`).join("<br>");
-    let more = (results.length > 5) ? `<br>ويوجد ${results.length-5} كتاب(كتب) أخرى...` : "";
-    return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته:<br>${list}${more}`;
+    // إعداد قائمة الكتب للعرض في الدردشة مع زر للانتقال للصف
+    let list = results.map((r,i) => {
+      return `<span class="chat-book" data-index="${i}" style="cursor:pointer;color:#003366;text-decoration:underline;">
+               📖 ${r.title} - ${r.author} (${r.year})
+              </span>`;
+    }).join("<br>");
+
+    // إضافة حدث النقر بعد إضافة الرسالة
+    setTimeout(()=>{
+      document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{
+        el.onclick = ()=>{
+          // تمييز الصف في الجدول
+          let book = results[parseInt(el.dataset.index)];
+          highlightRow(book);
+        };
+      });
+    },50);
+
+    return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته:<br>${list}`;
   }
 
   // كلمات مفتاحية ثابتة
@@ -409,6 +424,21 @@ function getReply(msg){
   return "🤖 أنا مساعدك الذكي، جرب كتابة اسم كتاب، مؤلف، سنة أو كلمة مفتاحية.";
 }
 
+// دالة جديدة لتمييز صف الكتاب في الجدول
+function highlightRow(book){
+  // إزالة أي تمييز سابق
+  document.querySelectorAll("#tbody tr").forEach(tr=>tr.style.background="white");
+
+  let rows = document.querySelectorAll("#tbody tr");
+  rows.forEach(tr=>{
+    let cells = tr.cells;
+    if(cells[0].innerText===book.title && cells[1].innerText===book.author){
+      tr.style.background="#fffa91"; // تمييز الصف
+      // تمرير الصفحة إذا لم يكن ظاهرًا
+      tr.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+  });
+}
 </script>
 
 </body>
