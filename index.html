@@ -403,14 +403,14 @@ function getReply(msg){
 
     // إضافة حدث النقر بعد إضافة الرسالة
     setTimeout(()=>{
-  document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{
-    el.onclick = ()=>{
-      let book = results[parseInt(el.dataset.index)];
-      highlightRow(book);     // تمييز الصف
-      showBookDetails(book); // عرض التفاصيل في الدردشة
-    };
-  });
-},50);
+      document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{
+        el.onclick = ()=>{
+          let book = results[parseInt(el.dataset.index)];
+          highlightRow(book);      // تمييز الصف في الجدول
+          showBookDetails(book);   // عرض التفاصيل في الدردشة
+        };
+      });
+    },50);
 
     return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته:<br>${list}`;
   }
@@ -424,7 +424,7 @@ function getReply(msg){
   return "🤖 أنا مساعدك الذكي، جرب كتابة اسم كتاب، مؤلف، سنة أو كلمة مفتاحية.";
 }
 
-// دالة جديدة لتمييز صف الكتاب في الجدول
+// تمييز صف الكتاب في الجدول
 function highlightRow(book){
   // إزالة أي تمييز سابق
   document.querySelectorAll("#tbody tr").forEach(tr=>tr.style.background="white");
@@ -440,22 +440,24 @@ function highlightRow(book){
   });
 }
 
-// دالة جديدة لعرض تفاصيل الكتاب في الدردشة
+// عرض تفاصيل الكتاب في الدردشة
 function showBookDetails(book){
   let detail = `
-    <b>📖 العنوان:</b> ${book.title}<br>
-    <b>✍️ المؤلف:</b> ${book.author}<br>
-    <b>🏢 دار النشر:</b> ${book.publisher}<br>
-    <b>📍 المكان:</b> ${book.place}<br>
-    <b>📝 الطبعة:</b> ${book.edition}<br>
-    <b>📅 السنة:</b> ${book.year}<br>
-    <b>📚 التصنيف:</b> ${book.class}<br>
-    <button onclick="downloadExcelFiltered([book])">⬇️ تحميل هذا الكتاب Excel</button>
+    <div style="margin-top:10px;padding:8px;border:1px solid #003366;border-radius:8px;background:#f5f5f5;">
+      <b>📖 العنوان:</b> ${book.title}<br>
+      <b>✍️ المؤلف:</b> ${book.author}<br>
+      <b>🏢 دار النشر:</b> ${book.publisher}<br>
+      <b>📍 المكان:</b> ${book.place}<br>
+      <b>📝 الطبعة:</b> ${book.edition}<br>
+      <b>📅 السنة:</b> ${book.year}<br>
+      <b>📚 التصنيف:</b> ${book.class}<br>
+      <button onclick="downloadExcelFiltered([book])" style="margin-top:5px;padding:5px 10px;background:#003366;color:white;border:none;border-radius:5px;cursor:pointer;">⬇️ تحميل هذا الكتاب Excel</button>
+    </div>
   `;
   addMessage(detail);
 }
 
-// دالة لتحميل Excel لكتاب واحد أو مجموعة كتب
+// تحميل Excel لكتاب واحد أو أكثر
 function downloadExcelFiltered(filtered){
   let ws = XLSX.utils.json_to_sheet(filtered);
   let wb = XLSX.utils.book_new();
