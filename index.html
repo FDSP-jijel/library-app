@@ -394,7 +394,10 @@ function getReply(msg){
   );
 
   if(results.length > 0){
-    return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته. استخدم مربع البحث لمزيد من التفاصيل.`;
+    // إعداد قائمة مختصرة من الكتب للعرض في الدردشة (أول 5 فقط لتجنب طول الرسالة)
+    let list = results.slice(0,5).map(r => `📖 ${r.title} - ${r.author} (${r.year})`).join("<br>");
+    let more = (results.length > 5) ? `<br>ويوجد ${results.length-5} كتاب(كتب) أخرى...` : "";
+    return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته:<br>${list}${more}`;
   }
 
   // كلمات مفتاحية ثابتة
@@ -405,6 +408,7 @@ function getReply(msg){
   // الرد الافتراضي
   return "🤖 أنا مساعدك الذكي، جرب كتابة اسم كتاب، مؤلف، سنة أو كلمة مفتاحية.";
 }
+
 </script>
 
 </body>
