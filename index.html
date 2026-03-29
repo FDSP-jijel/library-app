@@ -405,9 +405,9 @@ function getReply(msg){
     setTimeout(()=>{
       document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{
         el.onclick = ()=>{
-          // تمييز الصف في الجدول
           let book = results[parseInt(el.dataset.index)];
           highlightRow(book);
+          showBookDetails(book);
         };
       });
     },50);
@@ -438,6 +438,29 @@ function highlightRow(book){
       tr.scrollIntoView({behavior:"smooth", block:"center"});
     }
   });
+}
+
+// دالة جديدة لعرض تفاصيل الكتاب في الدردشة
+function showBookDetails(book){
+  let detail = `
+    <b>📖 العنوان:</b> ${book.title}<br>
+    <b>✍️ المؤلف:</b> ${book.author}<br>
+    <b>🏢 دار النشر:</b> ${book.publisher}<br>
+    <b>📍 المكان:</b> ${book.place}<br>
+    <b>📝 الطبعة:</b> ${book.edition}<br>
+    <b>📅 السنة:</b> ${book.year}<br>
+    <b>📚 التصنيف:</b> ${book.class}<br>
+    <button onclick="downloadExcelFiltered([book])">⬇️ تحميل هذا الكتاب Excel</button>
+  `;
+  addMessage(detail);
+}
+
+// دالة لتحميل Excel لكتاب واحد أو مجموعة كتب
+function downloadExcelFiltered(filtered){
+  let ws = XLSX.utils.json_to_sheet(filtered);
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "books");
+  XLSX.writeFile(wb,"books.xlsx");
 }
 </script>
 
