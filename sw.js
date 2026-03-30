@@ -1,4 +1,5 @@
 const CACHE_NAME = "library-catalog-v3";
+
 const urlsToCache = [
   "./",
   "./index.html",
@@ -10,32 +11,49 @@ const urlsToCache = [
   "./catalog_FLPS_jijel.csv"
 ];
 
-// تثبيت الـ Service Worker وتخزين الملفات
+// 🔵 التثبيت
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
+
+  // تفعيل فوري
   self.skipWaiting();
 });
 
-// تنشيط الـ Service Worker وحذف الكاش القديم
+// 🔵 التفعيل + حذف الكاش القديم
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys => 
+    caches.keys().then(keys =>
       Promise.all(
         keys.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
         })
       )
     )
   );
+
   self.clients.claim();
 });
 
-// التقاط الطلبات: حاول تحميل الإنترنت، وإذا لم يكن متاحًا استخدم الكاش
+// 🔵 إصلاح مهم جدًا (يحل مشكلة Install + loop)
 self.addEventListener("fetch", event => {
+
+  // مهم جدًا لفتح التطبيق بدون مشاكل (Navigation fix)
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  // باقي الملفات
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request).then(cached => {
+      return cached || fetch(event.request);
+    })
   );
 });
