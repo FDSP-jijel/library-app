@@ -4,6 +4,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#003366">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">    
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Library catalog FLPS Jijel</title>
@@ -178,6 +179,22 @@ button:hover{
         bottom: 90px;    /* رفع قليلاً عن الحافة السفلية */
     }
 }    
+/* تحسين ظهور المساعد على الموبايل */
+#chatBox {
+    z-index: 9999;
+}
+#chatBtn {
+    z-index: 10000;
+}
+
+/* حجم المساعد على الشاشات الصغيرة */
+@media (max-width: 480px) {
+    #chatBox {
+        width: 90%;
+        left: 5%;
+        bottom: 90px;
+    }
+}    
 #chatHeader{
     background:#003366;
     color:white;
@@ -269,41 +286,36 @@ button:hover{
 <button onclick="downloadExcel()">تحميل Excel</button>
 </div>
 </div>
-
 <button id="installBtn">📲 إضافة إلى الشاشة الرئيسية</button>
-
 <script>
-let data=[], currentData=[], currentPage=1, rowsPerPage=100;
-let deferredPrompt = null;
-const installBtn = document.getElementById("installBtn");
+  const installBtn = document.getElementById("installBtn");
+  let deferredPrompt = null;
 
-// INSTALL BUTTON
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    showInstallButton();
-});
+  window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallButton();
+  });
 
-function showInstallButton(){
-    installBtn.style.display = "block";
-    updateInstallText();
-    installBtn.onclick = async () => {
-        if(deferredPrompt){
-            deferredPrompt.prompt();
-            await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            installBtn.style.display = "none";
-        } else {
-            alert("اضغط على ⋮ ثم اختر 'Ajouter à l’écran d’accueil'");
-        }
-    };
-}
+  function showInstallButton(){
+      installBtn.style.display = "block";
+      updateInstallText();
+      installBtn.onclick = async () => {
+          if(deferredPrompt){
+              deferredPrompt.prompt();
+              await deferredPrompt.userChoice;
+              deferredPrompt = null;
+              installBtn.style.display = "none";
+          } else {
+              alert("اضغط على ⋮ ثم اختر 'Ajouter à l’écran d’accueil'");
+          }
+      };
+  }
 
-function updateInstallText(){
-    let lang = localStorage.getItem("lang") || "ar";
-    installBtn.innerText = (lang === "fr") ? "📲 Ajouter à l’écran d’accueil" : "📲 تثبيت Library catalog FLPS Jijel";
-}
-
+  function updateInstallText(){
+      let lang = localStorage.getItem("lang") || "ar";
+      installBtn.innerText = (lang === "fr") ? "📲 Ajouter à l’écran d’accueil" : "📲 إضافة إلى الشاشة الرئيسية";
+  }
 // fallback للهواتف القديمة
 setTimeout(()=>{ if(!deferredPrompt) showInstallButton(); },2000);
 
