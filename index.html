@@ -379,12 +379,14 @@ window.onload=()=>{let savedLang=localStorage.getItem("lang");if(savedLang) setL
 function downloadExcel(){let ws=XLSX.utils.json_to_sheet(currentData);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"catalog");XLSX.writeFile(wb,"catalog.xlsx");}
 
 /* SERVICE WORKER */
-if ("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js")
-    .then(reg => console.log("SW registered"))
-    .catch(err => console.log("SW error", err));
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("SW registered"))
+      .catch(err => console.log("SW failed", err));
+  });
 }
-    
+
 /* CHAT */
 document.getElementById("chatBtn").onclick = ()=>{let box=document.getElementById("chatBox");box.style.display=(box.style.display==="flex")?"none":"flex";};
 function handleChat(e){if(e.key!=="Enter") return; let input=document.getElementById("chatInput"); let msg=input.value.trim(); if(!msg) return; addMessage("👤 "+msg); let reply=getReply(msg.toLowerCase()); setTimeout(()=>addMessage("🤖 "+reply),500); input.value="";}
