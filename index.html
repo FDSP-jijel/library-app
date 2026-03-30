@@ -296,7 +296,6 @@ function updateInstallText(){
 }
 
 // fallback للهواتف القديمة
-setTimeout(()=>{ if(!deferredPrompt) showInstallButton(); },2000);
 
 /* LOAD DATA */
 fetch("catalog_FLPS_jijel.csv").then(r=>r.text()).then(text=>{
