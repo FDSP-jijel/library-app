@@ -6,9 +6,9 @@ const urlsToCache = [
   "./manifest.json",
   "./logo.png",
   "./faculty.jpg",
-  "./icon.png",
-  "./icons.png",
-  "./catalog_FDSP_jijel.csv"
+  "./icon-192.png",
+  "./icon-512.png",
+  "./catalog_FLPS_jijel.csv"
 ];
 
 self.addEventListener("install", event => {
