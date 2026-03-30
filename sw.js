@@ -1,59 +1,57 @@
-const CACHE_NAME = "library-catalog-v3";
+const CACHE_NAME = "library-catalog-v4";
 
-const urlsToCache = [
+const FILES = [
   "./",
   "./index.html",
   "./manifest.json",
   "./logo.png",
   "./faculty.jpg",
-  "./icons.png", // 192x192
-  "./icon.png",  // 512x512
+  "./icons.png",
+  "./icon.png",
   "./catalog_FLPS_jijel.csv"
 ];
 
-// 🔵 التثبيت
+// install
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES))
   );
-
-  // تفعيل فوري
   self.skipWaiting();
 });
 
-// 🔵 التفعيل + حذف الكاش القديم
+// activate
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
+        keys.map(k => k !== CACHE_NAME && caches.delete(k))
       )
     )
   );
-
   self.clients.claim();
 });
 
-// 🔵 إصلاح مهم جدًا (يحل مشكلة Install + loop)
+// fetch (نسخة آمنة بدون loop)
 self.addEventListener("fetch", event => {
 
-  // مهم جدًا لفتح التطبيق بدون مشاكل (Navigation fix)
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match("./index.html"))
-    );
-    return;
-  }
+  const request = event.request;
 
-  // باقي الملفات
+  // تجاهل الطلبات غير GET
+  if (request.method !== "GET") return;
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      return cached || fetch(event.request);
+    caches.match(request).then(cached => {
+      const fetchPromise = fetch(request)
+        .then(networkResponse => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => cached);
+
+      return cached || fetchPromise;
     })
   );
 });
