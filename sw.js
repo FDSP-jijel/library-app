@@ -5,8 +5,8 @@ const urlsToCache = [
   "./manifest.json",
   "./logo.png",
   "./faculty.jpg",
-  "./icon-192.png",
-  "./icon-512.png",
+  "./icons.png", // 192x192
+  "./icon.png",  // 512x512
   "./catalog_FLPS_jijel.csv"
 ];
 
