@@ -155,7 +155,7 @@ button:hover{
     padding:15px;
     border-radius:50%;
     cursor:pointer;
-    z-index:999;
+    z-index: 10000; /* هذا أضفته */
 }
 #chatBox{
     position:fixed;
@@ -168,7 +168,16 @@ button:hover{
     display:none;
     flex-direction:column;
     overflow:hidden;
+     z-index: 9999;  /* هذا أضفته */
 }
+/* تصغير صندوق الدردشة للشاشات الصغيرة */
+@media (max-width: 480px) {
+    #chatBox {
+        width: 90%;      /* عرض 90% من الشاشة */
+        left: 5%;        /* مسافة 5% من اليسار */
+        bottom: 90px;    /* رفع قليلاً عن الحافة السفلية */
+    }
+}    
 #chatHeader{
     background:#003366;
     color:white;
