@@ -2,22 +2,21 @@
   "name": "Library catalog FLPS Jijel",
   "short_name": "FLPS Library",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003366",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "icons.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
-✅ 2) service-worker.js (نسخة
