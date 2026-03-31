@@ -253,12 +253,24 @@ window.addEventListener('beforeinstallprompt', (e) => {
   const btn = document.getElementById("installBtn");
   btn.style.display = "block";
 
-  btn.onclick = async () => {
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  };
-});
+ btn.onclick = async () => {
+  if(!deferredPrompt){
+    alert("التطبيق غير جاهز للتثبيت");
+    return;
+  }
+
+  deferredPrompt.prompt();
+
+  const { outcome } = await deferredPrompt.userChoice;
+
+  if(outcome === "accepted"){
+    console.log("تم التثبيت");
+  } else {
+    console.log("تم الإلغاء");
+  }
+
+  deferredPrompt = null;
+};
 
 /* LOAD DATA */
 fetch("catalog_FLPS_jijel.csv")
