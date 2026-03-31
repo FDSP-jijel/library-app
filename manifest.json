@@ -1,8 +1,8 @@
 {
   "name": "Library catalog FLPS Jijel",
   "short_name": "FLPS Library",
-  "start_url": ".",
-  "scope": "/",
+  "start_url": "/library-app/",
+  "scope": "/library-app/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003366",
