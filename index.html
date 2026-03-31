@@ -314,6 +314,7 @@ fetch("catalog_FLPS_jijel.csv").then(r=>r.text()).then(text=>{
     });
     display(data);
 });
+    document.getElementById("loading").style.display = "none";
 
 /* DISPLAY */
 function display(rows){
