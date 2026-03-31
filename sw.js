@@ -1,4 +1,4 @@
-const CACHE_NAME = "library-v5";
+const CACHE_NAME = "library-v7";
 
 const urlsToCache = [
   "./",
@@ -11,15 +11,24 @@ const urlsToCache = [
   "./catalog_FLPS_jijel.csv"
 ];
 
-// تثبيت
+// INSTALL
 self.addEventListener("install", event => {
+  self.skipWaiting();
+
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(async cache => {
+      for (const url of urlsToCache) {
+        try {
+          await cache.add(url);
+        } catch (e) {
+          console.warn("Cache failed for:", url);
+        }
+      }
+    })
   );
 });
 
-// تفعيل
+// ACTIVATE
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -32,9 +41,11 @@ self.addEventListener("activate", event => {
       )
     )
   );
+
+  self.clients.claim();
 });
 
-// جلب
+// FETCH
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(response => {
