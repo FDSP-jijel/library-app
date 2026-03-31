@@ -243,35 +243,28 @@ button:hover{
 <script>
 
 let data=[], currentData=[], currentPage=1, rowsPerPage=100;
-let deferredPrompt=null;
+let deferredPrompt = null;
+const installBtn = document.getElementById("installBtn");
 
-/* INSTALL */
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  installBtn.style.display = "block";
+});
 
-  const btn = document.getElementById("installBtn");
-  btn.style.display = "block";
-
- btn.onclick = async () => {
-  if(!deferredPrompt){
-    alert("التطبيق غير جاهز للتثبيت");
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) {
+    alert("التطبيق غير جاهز للتثبيت بعد");
     return;
   }
 
   deferredPrompt.prompt();
-
   const { outcome } = await deferredPrompt.userChoice;
-
-  if(outcome === "accepted"){
-    console.log("تم التثبيت");
-  } else {
-    console.log("تم الإلغاء");
-  }
-
+  console.log("Install outcome:", outcome);
   deferredPrompt = null;
-};
-
+  installBtn.style.display = "none";
+});
+    
 /* LOAD DATA */
 fetch("catalog_FLPS_jijel.csv")
 .then(r=>r.text())
