@@ -1,57 +1,83 @@
-const CACHE_NAME = "library-catalog-v5";
+// Service Worker للتطبيق PWA
 
-const FILES = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./logo.png",
-  "./faculty.jpg",
-  "./icons.png",
-  "./icon.png",
-  "./catalog_FLPS_jijel.csv"
+const CACHE_NAME = 'library-app-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './sw.js'
 ];
 
-// install
-self.addEventListener("install", event => {
+// Install Event
+self.addEventListener('install', (event) => {
+  console.log('⚙️ Service Worker تثبيت...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES))
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('✅ تم فتح Cache');
+      return cache.addAll(ASSETS).catch((err) => {
+        console.log('⚠️ بعض الملفات لم تُخزن:', err);
+      });
+    })
   );
   self.skipWaiting();
 });
 
-// activate
-self.addEventListener("activate", event => {
+// Activate Event
+self.addEventListener('activate', (event) => {
+  console.log('🚀 Service Worker تفعيل...');
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(k => k !== CACHE_NAME && caches.delete(k))
-      )
-    )
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('🗑️ حذف Cache قديم:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
   self.clients.claim();
 });
 
-// fetch (äÓÎÉ ÂãäÉ ÈÏæä loop)
-self.addEventListener("fetch", event => {
-
-  const request = event.request;
-
-  // ÊÌÇåá ÇáØáÈÇÊ ÛíÑ GET
-  if (request.method !== "GET") return;
+// Fetch Event - Network First, then Cache
+self.addEventListener('fetch', (event) => {
+  // تخطي requests غير GET
+  if (event.request.method !== 'GET') {
+    return;
+  }
 
   event.respondWith(
-    caches.match(request).then(cached => {
-      const fetchPromise = fetch(request)
-        .then(networkResponse => {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(request, responseClone);
+    fetch(event.request)
+      .then((response) => {
+        // تخزين الاستجابة الناجحة
+        if (!response || response.status !== 200) {
+          return response;
+        }
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+        return response;
+      })
+      .catch(() => {
+        // في حالة عدم الاتصال، استخدم Cache
+        return caches.match(event.request).then((response) => {
+          return response || new Response('تحقق من اتصالك بالإنترنت', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+              'Content-Type': 'text/plain'
+            })
           });
-          return networkResponse;
-        })
-        .catch(() => cached);
-
-      return cached || fetchPromise;
-    })
+        });
+      })
   );
+});
+
+// Background Sync (اختياري)
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-data') {
+    console.log('📡 مزامنة البيانات...');
+  }
 });
