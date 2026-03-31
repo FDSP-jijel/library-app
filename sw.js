@@ -1,4 +1,4 @@
-const CACHE_NAME = "library-catalog-v4";
+const CACHE_NAME = "library-catalog-v9";
 
 const FILES = [
   "./",
@@ -31,12 +31,12 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// fetch (‰”Œ… ¬„‰… »œÊ‰ loop)
+// fetch (√§√ì√é√â √Ç√£√§√â √à√è√¶√§ loop)
 self.addEventListener("fetch", event => {
 
   const request = event.request;
 
-  //  Ã«Â· «·ÿ·»«  €Ì— GET
+  // √ä√å√á√•√° √á√°√ò√°√à√á√ä √õ√≠√ë GET
   if (request.method !== "GET") return;
 
   event.respondWith(
