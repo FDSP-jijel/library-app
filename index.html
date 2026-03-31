@@ -1,0 +1,447 @@
+﻿<!DOCTYPE html>  <html lang="ar">  
+<head>  
+<link rel="manifest" href="manifest.json">  
+<meta name="theme-color" content="#003366">  
+<meta charset="UTF-8">  
+<meta name="mobile-web-app-capable" content="yes">  
+<meta name="apple-mobile-web-app-capable" content="yes">  
+<title>FLPS Library Catalog</title>  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  <style>  
+body{  
+    font-family:Arial;  
+    margin:40px;  
+    direction: rtl;  
+    background:linear-gradient(to right,#eef2f3,#dfe9f3);  
+    padding-bottom:120px;  
+}  
+  
+/* HEADER */  
+.header{  
+    display:flex;  
+    align-items:center;  
+    gap:15px;  
+    padding:15px 20px;  
+    border-radius:12px;  
+    margin-bottom:20px;  
+    background:white;  
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);  
+}  
+.header img{  
+    width:85px;  
+    height:85px;  
+    object-fit:contain;  
+    border-radius:10px;  
+    border:2px solid #ddd;  
+    background:white;  
+    padding:3px;  
+}  
+  
+/* LANG */  
+.lang-switch{  
+    margin-top:10px;  
+    text-align:center;  
+}  
+  
+/* SIDEBAR */  
+.container{  
+    display:flex;  
+    gap:25px;  
+    align-items:flex-start;  
+}  
+.sidebar{  
+    width:340px;  
+    flex-shrink:0;  
+}  
+.card{  
+    width:100%;  
+    padding:12px;  
+    box-sizing:border-box;  
+}  
+.card img{  
+    width:100%;  
+    height:320px;  
+    object-fit:contain;  
+    border-radius:14px;  
+    border:3px solid #003366;  
+    background:white;  
+    padding:10px;  
+}  
+  
+/* SEARCH */  
+.search-input{  
+    position:relative;  
+    display:inline-block;  
+}  
+.search-input span{  
+    position:absolute;  
+    right:10px;  
+    top:50%;  
+    transform:translateY(-50%);  
+}  
+.search-input input{  
+    padding:12px 35px 12px 12px;  
+}  
+  
+/* TABLE */  
+table{  
+    border-collapse:collapse;  
+    width:100%;  
+    margin-top:20px;  
+    background:white;  
+    border-radius:10px;  
+    overflow:hidden;  
+}  
+th,td{  
+    border:1px solid #eee;  
+    padding:10px;  
+    text-align:right;  
+}  
+th{  
+    background:#003366;  
+    color:white;  
+    cursor:pointer;  
+}  
+  
+/* BUTTON */  
+button{  
+    padding:10px 15px;  
+    margin:5px;  
+    border:none;  
+    background:#003366;  
+    color:white;  
+    border-radius:6px;  
+    cursor:pointer;  
+}  
+button:hover{  
+    background:#0055aa;  
+}  
+  
+/* PAGINATION */  
+#pagination{  
+    margin-top:15px;  
+    display:flex;  
+    flex-wrap:wrap;  
+    gap:5px;  
+    justify-content:center;  
+}  
+  
+/* INSTALL BUTTON */  
+#installBtn{  
+    position:fixed;  
+    top:20px;  
+    left:20px;  
+    padding:12px 18px;  
+    background:#1a8f3a;  
+    color:white;  
+    border:none;  
+    border-radius:10px;  
+    font-size:14px;  
+    cursor:pointer;  
+    display:none;  
+    z-index:999;  
+}  
+  
+/* CHAT */  
+#chatBtn{  
+    position:fixed;  
+    bottom:20px;  
+    left:20px;  
+    background:#003366;  
+    color:white;  
+    padding:15px;  
+    border-radius:50%;  
+    cursor:pointer;  
+    z-index:999;  
+}  
+#chatBox{  
+    position:fixed;  
+    bottom:80px;  
+    left:20px;  
+    width:300px;  
+    background:white;  
+    border-radius:10px;  
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);  
+    display:none;  
+    flex-direction:column;  
+    overflow:hidden;  
+}  
+#chatHeader{  
+    background:#003366;  
+    color:white;  
+    padding:10px;  
+    text-align:center;  
+}  
+#chatMessages{  
+    height:200px;  
+    overflow-y:auto;  
+    padding:10px;  
+    font-size:14px;  
+}  
+#chatInput{  
+    border:none;  
+    border-top:1px solid #ddd;  
+    padding:10px;  
+    width:100%;  
+}  
+</style>  </head>  
+<body>  <!-- CHAT -->  <div id="chatBtn">💬</div>  
+<div id="chatBox">  
+  <div id="chatHeader">المساعد</div>  
+  <div id="chatMessages"></div>  
+  <input type="text" id="chatInput" placeholder="اكتب سؤالك..." onkeypress="handleChat(event)">  
+</div>  <!-- HEADER -->  <div class="header">  
+    <img src="logo.png">  
+    <div>  
+        <h2 id="title1">جامعة محمد الصديق بن يحيى – جيجل</h2>  
+        <h3 id="title2" style="color:#1a8f3a">كلية الحقوق والعلوم السياسية</h3>  
+        <div class="lang-switch">  
+            <button onclick="setLang('ar')">AR</button>  
+            <button onclick="setLang('fr')">FR</button>  
+            <button onclick="setLang('en')">EN</button>  
+        </div>  
+    </div>  
+</div>  <div class="container">  
+<div class="sidebar">  
+    <div class="card">  
+        <img src="faculty.jpg">  
+        <p id="facultyText">كلية الحقوق والعلوم السياسية</p>  
+    </div>  
+</div>  <div class="main">  
+<h1 id="mainTitle" style="text-align:center;">فهرس مكتبة الكلية</h1>  <div class="search-box">  
+    <div class="search-input">  
+        <span>🔍</span>  
+        <input type="text" id="search" onkeyup="searchTable()" placeholder="ابحث...">  
+    </div>  
+    <input type="text" id="authorFilter" placeholder="المؤلف">  
+    <input type="text" id="yearFilter" placeholder="السنة">  
+    <button onclick="advancedFilter()">بحث متقدم</button>  
+</div>  <p id="count"></p>  <table>  
+<thead>  
+<tr>  
+<th onclick="sortTable('title')">العنوان</th>  
+<th onclick="sortTable('author')">المؤلف</th>  
+<th onclick="sortTable('publisher')">دار النشر</th>  
+<th onclick="sortTable('place')">المكان</th>  
+<th onclick="sortTable('edition')">الطبعة</th>  
+<th onclick="sortTable('year')">السنة</th>  
+<th onclick="sortTable('class')">التصنيف</th>  
+</tr>  
+</thead>  
+<tbody id="tbody"></tbody>  
+</table>  <br>  
+<button onclick="prevPage()">السابق</button>  
+<span id="pageInfo"></span>  
+<button onclick="nextPage()">التالي</button>  
+<div id="pagination"></div>  
+<br>  
+<button onclick="downloadExcel()">تحميل Excel</button>  
+</div>  
+</div>  <button id="installBtn">📲 إضافة إلى الشاشة الرئيسية</button>
+
+<script>  
+let data=[], currentData=[], currentPage=1, rowsPerPage=100;  
+let deferredPrompt = null;  
+const installBtn = document.getElementById("installBtn");  
+  
+// INSTALL BUTTON  
+window.addEventListener('beforeinstallprompt', (e) => {  
+    e.preventDefault();  
+    deferredPrompt = e;  
+    showInstallButton();  
+});  
+  
+function showInstallButton(){  
+    installBtn.style.display = "block";  
+    updateInstallText();  
+    installBtn.onclick = async () => {  
+        if(deferredPrompt){  
+            deferredPrompt.prompt();  
+            await deferredPrompt.userChoice;  
+            deferredPrompt = null;  
+            installBtn.style.display = "none";  
+        } else {  
+            alert("اضغط على ⋮ ثم اختر 'Ajouter à l’écran d’accueil'");  
+        }  
+    };  
+}  
+  
+function updateInstallText(){  
+    let lang = localStorage.getItem("lang") || "ar";  
+    installBtn.innerText = (lang === "fr") ? "📲 Ajouter à l’écran d’accueil" : "📲 إضافة إلى الشاشة الرئيسية";  
+}  
+  
+// fallback للهواتف القديمة  
+  
+/* LOAD DATA */  
+fetch("catalog_FLPS_jijel.csv").then(r=>r.text()).then(text=>{  
+    text=text.replace(/^\uFEFF/,"");  
+    let rows=text.split(/\r?\n/);  
+    rows.slice(1).forEach(row=>{  
+        if(!row.trim()) return;  
+        let cols=row.split(";");  
+        if(cols.length<8) cols=row.split("\t");  
+        cols=cols.map(c=>c.replace(/^"|"$/g,"").trim());  
+        if(cols.length>=8){  
+            data.push({title:cols[1]||"",author:cols[2]||"",publisher:cols[3]||"",place:cols[5]||"",edition:cols[6]||"",year:cols[4]||"",class:cols[7]||""});  
+        }  
+    });  
+    display(data);  
+});  
+  
+/* DISPLAY */  
+function display(rows){  
+    currentData=rows;  
+    let max=Math.ceil(rows.length/rowsPerPage);  
+    if(currentPage>max) currentPage=1;  
+    let start=(currentPage-1)*rowsPerPage;  
+    let pageRows=rows.slice(start,start+rowsPerPage);  
+    document.getElementById("tbody").innerHTML=pageRows.map(r=>`<tr><td>${r.title}</td><td>${r.author}</td><td>${r.publisher}</td><td>${r.place}</td><td>${r.edition}</td><td>${r.year}</td><td>${r.class}</td></tr>`).join("");  
+    updateCountText(rows.length);  
+    document.getElementById("pageInfo").innerText="صفحة "+currentPage+" / "+max;  
+    let pages="";  
+    for(let i=1;i<=max;i++){pages+=`<button onclick="goToPage(${i})">${i}</button>`;}  
+    document.getElementById("pagination").innerHTML=pages;  
+}  
+  
+/* PAGINATION */  
+function goToPage(p){currentPage=p;display(currentData);}  
+function nextPage(){if(currentPage<Math.ceil(currentData.length/rowsPerPage)){currentPage++;display(currentData);}}  
+function prevPage(){if(currentPage>1){currentPage--;display(currentData);}}  
+  
+/* SEARCH & FILTER */  
+function searchTable(){let q=document.getElementById("search").value.toLowerCase();let filtered=data.filter(r=>Object.values(r).some(v=>v && v.toLowerCase().includes(q)));currentPage=1;display(filtered);}  
+function advancedFilter(){let a=document.getElementById("authorFilter").value.toLowerCase();let y=document.getElementById("yearFilter").value;let filtered=data.filter(r=>(!a || r.author.toLowerCase().includes(a)) && (!y || r.year.includes(y)));currentPage=1;display(filtered);}  
+  
+/* SORT */  
+function sortTable(key){let sorted=[...currentData].sort((a,b)=>(a[key]||"").localeCompare(b[key]||""));display(sorted);}  
+  
+/* COUNT */  
+function updateCountText(num){  
+    let lang = localStorage.getItem("lang") || "ar";  
+    const labels = {ar:"عدد الكتب: ",fr:"Nombre de livres : ",en:"Books count: "};  
+    document.getElementById("count").innerText=labels[lang]+(num ?? currentData.length);  
+}  
+  
+/* LANG */  
+function setLang(lang){  
+    localStorage.setItem("lang", lang);  
+    document.body.style.direction=(lang==="ar")?"rtl":"ltr";  
+    const texts={  
+        ar:{title:"فهرس مكتبة الكلية",faculty:"كلية الحقوق والعلوم السياسية",search:"ابحث...",author:"المؤلف",year:"السنة",advanced:"بحث متقدم",prev:"السابق",next:"التالي",download:"تحميل Excel"},  
+        fr:{title:"Catalogue de la bibliothèque",faculty:"Faculté de droit et sciences politiques",search:"Rechercher...",author:"Auteur",year:"Année",advanced:"Recherche avancée",prev:"Précédent",next:"Suivant",download:"Télécharger Excel"},  
+        en:{title:"Library Catalog",faculty:"Faculty of Law and Political Science",search:"Search...",author:"Author",year:"Year",advanced:"Advanced Search",prev:"Previous",next:"Next",download:"Download Excel"}  
+    };  
+    let t=texts[lang];  
+    document.getElementById("mainTitle").innerText=t.title;  
+    document.getElementById("facultyText").innerText=t.faculty;  
+    document.getElementById("title2").innerText=t.faculty;  
+    document.getElementById("search").placeholder=t.search;  
+    document.getElementById("authorFilter").placeholder=t.author;  
+    document.getElementById("yearFilter").placeholder=t.year;  
+    document.querySelector("button[onclick='advancedFilter()']").innerText=t.advanced;  
+    document.querySelector("button[onclick='prevPage()']").innerText=t.prev;  
+    document.querySelector("button[onclick='nextPage()']").innerText=t.next;  
+    document.querySelector("button[onclick='downloadExcel()']").innerText=t.download;  
+    updateCountText();  
+    updateInstallText();  
+}  
+  
+/* LOAD SAVED LANG */  
+window.onload=()=>{let savedLang=localStorage.getItem("lang");if(savedLang) setLang(savedLang);}  
+  
+/* EXCEL */  
+function downloadExcel(){let ws=XLSX.utils.json_to_sheet(currentData);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"catalog");XLSX.writeFile(wb,"catalog.xlsx");}  
+  
+/* SERVICE WORKER */  
+if ("serviceWorker" in navigator) {  
+  window.addEventListener("load", () => {  
+    navigator.serviceWorker.register("./service-worker.js")  
+      .then(() => console.log("SW registered"))  
+      .catch(err => console.log("SW failed", err));  
+  });  
+}  
+  
+/* CHAT */  
+document.getElementById("chatBtn").onclick = ()=>{let box=document.getElementById("chatBox");box.style.display=(box.style.display==="flex")?"none":"flex";};  
+function handleChat(e){if(e.key!=="Enter") return; let input=document.getElementById("chatInput"); let msg=input.value.trim(); if(!msg) return; addMessage("👤 "+msg); let reply=getReply(msg.toLowerCase()); setTimeout(()=>addMessage("🤖 "+reply),500); input.value="";}  
+function addMessage(text){let box=document.getElementById("chatMessages"); box.innerHTML+="<div>"+text+"</div>"; box.scrollTop=box.scrollHeight;}  
+function getReply(msg){  
+  msg = msg.toLowerCase();  
+  
+  // البحث داخل الكتب  
+  let results = data.filter(r =>  
+    Object.values(r).some(v => v && v.toLowerCase().includes(msg))  
+  );  
+  
+  if(results.length > 0){  
+    // إعداد قائمة الكتب للعرض في الدردشة مع زر للانتقال للصف  
+    let list = results.map((r,i) => {  
+      return `<span class="chat-book" data-index="${i}" style="cursor:pointer;color:#003366;text-decoration:underline;">  
+               📖 ${r.title} - ${r.author} (${r.year})  
+              </span>`;  
+    }).join("<br>");  
+  
+    // إضافة حدث النقر بعد إضافة الرسالة  
+    setTimeout(()=>{  
+      document.querySelectorAll("#chatMessages .chat-book").forEach(el=>{  
+        el.onclick = ()=>{  
+          let book = results[parseInt(el.dataset.index)];  
+          highlightRow(book);      // تمييز الصف في الجدول  
+          showBookDetails(book);   // عرض التفاصيل في الدردشة  
+        };  
+      });  
+    },50);  
+  
+    return `🔍 وجدت ${results.length} كتاب(كتب) مرتبطة بما كتبته:<br>${list}`;  
+  }  
+  
+  // كلمات مفتاحية ثابتة  
+  if(msg.includes("تحميل")) return "📥 اضغط على زر تحميل Excel";  
+  if(msg.includes("تثبيت") || msg.includes("install")) return "📲 اضغط على زر التثبيت أعلى الصفحة";  
+  if(msg.includes("bonjour")) return "Bonjour 👋 Comment puis-je vous aider ?";  
+  
+  // الرد الافتراضي  
+  return "🤖 أنا مساعدك الذكي، جرب كتابة اسم كتاب، مؤلف، سنة أو كلمة مفتاحية.";  
+}  
+  
+// تمييز صف الكتاب في الجدول  
+function highlightRow(book){  
+  // إزالة أي تمييز سابق  
+  document.querySelectorAll("#tbody tr").forEach(tr=>tr.style.background="white");  
+  
+  let rows = document.querySelectorAll("#tbody tr");  
+  rows.forEach(tr=>{  
+    let cells = tr.cells;  
+    if(cells[0].innerText===book.title && cells[1].innerText===book.author){  
+      tr.style.background="#fffa91"; // تمييز الصف  
+      // تمرير الصفحة إذا لم يكن ظاهرًا  
+      tr.scrollIntoView({behavior:"smooth", block:"center"});  
+    }  
+  });  
+}  
+  
+// عرض تفاصيل الكتاب في الدردشة  
+function showBookDetails(book){  
+  let detail = `  
+    <div style="margin-top:10px;padding:8px;border:1px solid #003366;border-radius:8px;background:#f5f5f5;">  
+      <b>📖 العنوان:</b> ${book.title}<br>  
+      <b>✍️ المؤلف:</b> ${book.author}<br>  
+      <b>🏢 دار النشر:</b> ${book.publisher}<br>  
+      <b>📍 المكان:</b> ${book.place}<br>  
+      <b>📝 الطبعة:</b> ${book.edition}<br>  
+      <b>📅 السنة:</b> ${book.year}<br>  
+      <b>📚 التصنيف:</b> ${book.class}<br>  
+      <button onclick="downloadExcelFiltered([book])" style="margin-top:5px;padding:5px 10px;background:#003366;color:white;border:none;border-radius:5px;cursor:pointer;">⬇️ تحميل هذا الكتاب Excel</button>  
+    </div>  
+  `;  
+  addMessage(detail);  
+}  
+  
+// تحميل Excel لكتاب واحد أو أكثر  
+function downloadExcelFiltered(filtered){  
+  let ws = XLSX.utils.json_to_sheet(filtered);  
+  let wb = XLSX.utils.book_new();  
+  XLSX.utils.book_append_sheet(wb, ws, "books");  
+  XLSX.writeFile(wb,"books.xlsx");  
+}  
+</script>  </body>  
+</html>
