@@ -1,22 +1,55 @@
 {
-  "name": "Library catalog FLPS Jijel",
-  "short_name": "FLPS Library",
+  "name": "مكتبة كلية الحقوق والعلوم السياسية - جيجل",
+  "short_name": "مكتبة FLPS",
+  "description": "فهرس شامل لمكتبة كلية الحقوق والعلوم السياسية بجامعة محمد الصديق بن يحيى - جيجل",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#003366",
-  "icons": [
+  "categories": ["education", "reference"],
+  "screenshots": [
     {
       "src": "icons.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "form_factor": "narrow"
     },
     {
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "form_factor": "wide"
+    }
+  ],
+  "icons": [
+    {
+      "src": "icons.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ابحث عن كتاب",
+      "short_name": "بحث",
+      "description": "ابحث عن الكتب في المكتبة",
+      "url": "./index.html?search=true",
+      "icons": [
+        {
+          "src": "icons.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
