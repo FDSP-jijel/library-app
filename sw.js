@@ -1,46 +1,57 @@
-const CACHE_NAME = "library-v8";
-const urlsToCache = [
+const CACHE_NAME = "library-catalog-v4";
+
+const FILES = [
   "./",
   "./index.html",
   "./manifest.json",
   "./logo.png",
   "./faculty.jpg",
-  "./icon-192.png",
-  "./icon-512.png",
+  "./icons.png",
+  "./icon.png",
   "./catalog_FLPS_jijel.csv"
 ];
 
-// INSTALL
+// install
 self.addEventListener("install", event => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      for (const url of urlsToCache) {
-        try {
-          await cache.add(url);
-        } catch (e) {
-          console.warn("Cache failed for:", url);
-        }
-      }
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES))
   );
+  self.skipWaiting();
 });
 
-// ACTIVATE
+// activate
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
+        keys.map(k => k !== CACHE_NAME && caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// FETCH
+// fetch (نسخة آمنة بدون loop)
 self.addEventListener("fetch", event => {
+
+  const request = event.request;
+
+  // تجاهل الطلبات غير GET
+  if (request.method !== "GET") return;
+
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(request).then(cached => {
+      const fetchPromise = fetch(request)
+        .then(networkResponse => {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => cached);
+
+      return cached || fetchPromise;
+    })
   );
 });
