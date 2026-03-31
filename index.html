@@ -354,7 +354,7 @@ function downloadExcel(){let ws=XLSX.utils.json_to_sheet(currentData);let wb=XLS
 /* SERVICE WORKER */  
 if ("serviceWorker" in navigator) {  
   window.addEventListener("load", () => {  
-    navigator.serviceWorker.register("./service-worker.js")  
+    navigator.serviceWorker.register("./sw.js")  
       .then(() => console.log("SW registered"))  
       .catch(err => console.log("SW failed", err));  
   });  
