@@ -1,4 +1,4 @@
-const CACHE_NAME = "library-v1";
+const CACHE_NAME = "library-v5";
 
 const urlsToCache = [
   "./",
