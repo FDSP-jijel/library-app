@@ -1,4 +1,4 @@
-const CACHE_NAME = "library-catalog-v9";
+const CACHE_NAME = "library-catalog-v5";
 
 const FILES = [
   "./",
