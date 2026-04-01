@@ -1,7 +1,7 @@
 {
   "name": "Library Catalog FLPS Jijel University",
   "short_name": "Libary Catalog FLPS Jijel",
-  "description": "فهرس شامل لمكتبة كلية الحقوق والعلوم السياسية بجامعة محمد الصديق بن يحيى - جيجل",
+  "description": "فهرس لمكتبة كلية الحقوق والعلوم السياسية بجامعة محمد الصديق بن يحيى - جيجل",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
